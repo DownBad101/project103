@@ -53,72 +53,84 @@ public class MemberRepositoryDB implements memberManagement {
     }
 
     @Override
-    public Member deleteMember(Member m)  {
-        String sql = "DELETE FROM Member WHERE memberID = ?";
+    public Member deleteMember(Member m) {
         try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, m.getMemberID());
-            int rowsAffected = statement.executeUpdate();
-            return rowsAffected > 0 ? m : null;
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM Member WHERE member_id=?")) {
+
+            stmt.setString(1, m.getMemberID());
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Deleting member failed.");
+            }
+
+            return m;
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting member", e);
+
+            return null;
         }
     }
 
     @Override
     public Member findMember(String memberID) {
-        String sql = "SELECT * FROM Member WHERE memberID = ?";
         try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, memberID);
-            try (ResultSet rs = statement.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Member WHERE member_id=?")) {
+
+            stmt.setString(1, memberID);
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return new Member(
-                            rs.getString("memberID"),
-                            rs.getString("memberName"),
-                            rs.getString("memberTel")
-                    );
+                    String name = rs.getString("member_name");
+                    String tel = rs.getString("member_tel");
+                    return new Member(memberID, name, tel);
+                } else {
+                    return null;
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding member", e);
+
+            return null;
         }
-        return null;
     }
 
     @Override
-    public Member updateMember(Member m){
-        String sql = "UPDATE Member SET memberName = ?, memberTel = ? WHERE memberID = ?";
+    public Member updateMember(Member m) {
         try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setString(1, m.getMemberName());
-            statement.setString(2, m.getMemberTel());
-            statement.setString(3, m.getMemberID());
-            statement.executeUpdate();
+             PreparedStatement stmt = conn.prepareStatement("UPDATE Member SET member_id=?, member_name=?, member_tel=? WHERE member_Id=?")) {
+
+            stmt.setString(1, m.getMemberID());
+            stmt.setString(2, m.getMemberName());
+            stmt.setString(3, m.getMemberTel());
+            stmt.setString(4, m.getMemberID());
+
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Updating member failed.");
+            }
+
             return m;
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating member", e);
+
+            return null;
         }
     }
 
     @Override
-    public Stream<Member> getAllMember(){
-        String sql = "SELECT * FROM Member";
-        List<Member> members = new ArrayList<>();
+    public Stream<Member> getAllMember() {
         try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
+             Statement stmt = conn.createStatement();
+
+             ResultSet rs = stmt.executeQuery("SELECT * FROM Member")) {
+
+            List<Member> m = new ArrayList<>();
             while (rs.next()) {
-                members.add(new Member(
-                        rs.getString("memberID"),
-                        rs.getString("memberName"),
-                        rs.getString("memberTel")
-                ));
+                String memberID = rs.getString("member_id");
+                String memberName = rs.getString("member_name");
+                String memberTel = rs.getString("member_tel");
+                m.add(new Member(memberID,memberName,memberTel));
             }
+                return m.stream();
         } catch (SQLException e) {
-            throw new RuntimeException("Error retrieving all members", e);
+            return Stream.empty();
         }
-        return members.stream();
     }
 
 }

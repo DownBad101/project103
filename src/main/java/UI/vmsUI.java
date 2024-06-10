@@ -38,6 +38,7 @@ public class vmsUI {
             switch (typeStorage.toLowerCase()) {
                 case "file":
                     memberServices = new memberServices(new MemberRepositoryFile(), new LoanRepositoryMem(), new VehicleRepositoryFile());
+                    selectPermission();
                     break;
                 case "jdbc":
                     System.out.println("Please login to Database Server");
@@ -60,6 +61,7 @@ public class vmsUI {
                     break;
                 case "memory":
                     memberServices = new memberServices(new MemberRepositoryMem(), new LoanRepositoryMem(), new VehicleRepositoryMem());
+                    selectPermission();
                     break;
                 default:
                     System.out.println("Invalid option, Please select [File, jdbc, Memory]!");
@@ -591,8 +593,10 @@ public class vmsUI {
                     throw new InvalidLoanException("Information cannot be empty");
                 }
                 Loan loan = memberServices.findLoan(loanID);
-                Vehicle vehicle = memberServices.findByVehicleID(loan.getVehicleID());
+
                 if (loan != null) {
+                    Vehicle vehicle = memberServices.findByVehicleID(loan.getVehicleID());
+                    Member member = memberServices.findMember(loan.getMemberID());
                     System.out.println("Loan_ID: " + loan.getLoanID());
                     System.out.println("Loan_MemberID: " + loan.getMemberID());
                     System.out.println("Loan_Vehicle: " + "Name: " + vehicle.getVehicleName() + ", Type: " + vehicle.getVehicleType());
