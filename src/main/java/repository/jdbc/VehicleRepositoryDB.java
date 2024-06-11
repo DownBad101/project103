@@ -111,9 +111,9 @@ public class VehicleRepositoryDB implements vehicleManagement {
              ResultSet rs = statement.executeQuery("SELECT * FROM Vehicle")) {
             List<Vehicle> v = new ArrayList<>();
             while (rs.next()) {
-                String vehicleID = rs.getString("vehicle_id");
-                String vehicleName = rs.getString("vehicle_name");
-                String vehicletype = rs.getString("vehicle_type");
+                String vehicleID = rs.getString("vehicleID");
+                String vehicleName = rs.getString("vehicleName");
+                String vehicletype = rs.getString("vehicletype");
                 v.add(new Vehicle(vehicleID,vehicleName,vehicletype));
             }
             return v.stream();

@@ -18,7 +18,7 @@ public class LoanRepositoryDB implements loanManagement {
         try (Connection connect = databaseConnection.getConnection();
              Statement statement = connect.createStatement()) {
             DatabaseMetaData metaData = connect.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, "loan", null);
+            ResultSet resultSet = metaData.getTables(null, null, "Loan", null);
 
             if (!resultSet.next()) {
                 String createTableSQL = "CREATE TABLE Loan ("
@@ -34,15 +34,15 @@ public class LoanRepositoryDB implements loanManagement {
         }
     }
     @Override
-    public Loan addLoan(String loanID, String memberID, String vehicleID){
+    public Loan addLoan(String loan_id, String memberId, String vehicleID){
         try (Connection connection = databaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement("INSERT INTO Loan (loanID, memberID, vehicleID) VALUES (?, ?, ?)")) {
-            statement.setString(1, loanID);
-            statement.setString(2, memberID);
+             PreparedStatement statement = connection.prepareStatement("INSERT INTO Loan (loan_id, memberId, vehicleID) VALUES (?, ?, ?)")) {
+            statement.setString(1, loan_id);
+            statement.setString(2, memberId);
             statement.setString(3, vehicleID);
 
             statement.executeUpdate();
-            return new Loan(loanID, memberID, vehicleID);
+            return new Loan(loan_id, memberId, vehicleID);
         } catch (SQLException e) {
             throw new RuntimeException("Error adding loan");
         }
@@ -52,7 +52,7 @@ public class LoanRepositoryDB implements loanManagement {
     public Loan deleteLoan(Loan l){
 
         try (Connection connection = databaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement("DELETE FROM Loan WHERE loanID = ?")) {
+             PreparedStatement statement = connection.prepareStatement("DELETE FROM Loan WHERE loan_id = ?")) {
             statement.setString(1, l.getLoanID());
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -69,7 +69,7 @@ public class LoanRepositoryDB implements loanManagement {
     @Override
     public Loan findLoan(String loanID){
         try (Connection connection = databaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM Loan WHERE loanID = ?")) {
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM Loan WHERE loan_id = ?")) {
             statement.setString(1, loanID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -87,7 +87,7 @@ public class LoanRepositoryDB implements loanManagement {
     @Override
     public Loan updateLoan(Loan l) {
         try (Connection connection = databaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement("UPDATE Loan SET loanID = ?, memberID = ?, vehicleID = ? WHERE loanID = ?")) {
+             PreparedStatement statement = connection.prepareStatement("UPDATE Loan SET loan_id = ?, memberID = ?, vehicleID = ? WHERE loan_id = ?")) {
             statement.setString(1, l.getMemberID());
             statement.setString(2, l.getVehicleID());
             statement.setString(3, l.getLoanID());
